@@ -1,11 +1,15 @@
 package com.example.musicplayer2;
 
+import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -14,6 +18,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
@@ -33,7 +38,7 @@ public class PlayMusicService extends Service {
     public String songPath="";
     //public String songDuration="";
     public String songArt="";
-
+    RemoteViews notificationLayoutExpanded;
     private final IBinder mBinder=new LocalBinder();
     public class LocalBinder extends Binder {
         PlayMusicService getService(){
@@ -44,6 +49,7 @@ public class PlayMusicService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
+        notificationLayoutExpanded=new RemoteViews(getPackageName(), R.layout.notification_small);
         mediaPlayer=new MediaPlayer();
         initialiseMusicPLayer();
     }
@@ -69,6 +75,9 @@ public class PlayMusicService extends Service {
                 localIntent.putExtra("songDuration",timeduration);
                 localBroadcastManager.sendBroadcast(localIntent);
                 Log.d("dbg","Successfully started playing music after onPrepared"+songTitle);
+                notificationLayoutExpanded.setTextViewText(R.id.not_songTitle,songTitle);
+                IntentFilter filter = new IntentFilter();
+                filter.addAction("CUSTOM_ACTION");
             }
         });
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -188,11 +197,24 @@ public class PlayMusicService extends Service {
         return songArt;
     }
     public void setnotification(){
-        Notification notification=new Notification.Builder(getApplicationContext())
-                .setContentTitle("Music Player : Now playing")
-                .setContentText(songTitle)
-                .setSmallIcon(android.R.drawable.ic_media_play).build();
-        NotificationManager nm=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        nm.notify(1,notification);
+        notificationLayoutExpanded.setTextViewText(R.id.not_songTitle,songTitle);
+        Intent play_pause= new Intent(this, NotificationIntentService.class);
+        play_pause.setAction("playpause");
+        Intent previousIntent= new Intent(this, NotificationIntentService.class);
+        previousIntent.setAction("previous");
+        Intent nextIntent= new Intent(this, NotificationIntentService.class);
+        nextIntent.setAction("next");
+        notificationLayoutExpanded.setOnClickPendingIntent(R.id.not_button_play, PendingIntent.getService(this, 123, play_pause, PendingIntent.FLAG_UPDATE_CURRENT));
+        notificationLayoutExpanded.setOnClickPendingIntent(R.id.not_button_prev, PendingIntent.getService(this, 124, previousIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+        notificationLayoutExpanded.setOnClickPendingIntent(R.id.not_button_next, PendingIntent.getService(this, 125, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+        NotificationCompat.Builder builder =new NotificationCompat.Builder(this)
+                .setSmallIcon(android.R.drawable.ic_btn_speak_now)
+                .setContentTitle("Title")
+                .setContentText("text")
+                .setAutoCancel(true)
+                .setContentIntent(PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),0))
+                .setCustomBigContentView(notificationLayoutExpanded);
+        NotificationManager notificationManager = (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(0, builder.build());
     }
 }
