@@ -34,6 +34,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Toast.makeText(MainActivity.this, "Seek bar progress is :" + progressChangedValue, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Seek bar progress is :" + progressChangedValue, Toast.LENGTH_SHORT).show();
                 int pos=(progressChangedValue*musicService.getMusicDuration())/100;
                 Log.d("dbg","Hello"+String.valueOf(pos));
                 musicService.seekToPosition(pos);
@@ -116,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
                 musicService.play();
                 actv.clearListSelection();
                 actv.setText("");
+                LinearLayout pl=((LinearLayout)findViewById(R.id.playing_now_frag));
+                pl.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -136,10 +139,10 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                Toast.makeText(MainActivity.this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+                //Toast.makeText(MainActivity.this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
             else {
-                Toast.makeText(MainActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
                 checkPermissions();
             }
         }
@@ -172,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectedSongName = (String) parent.getItemAtPosition(position);
-                Toast.makeText(getBaseContext(),selectedSongName,Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getBaseContext(),selectedSongName,Toast.LENGTH_SHORT).show();
                 //musicService.currentSongPosition=position;
                 musicService.setSong(position);
                 if(listTransfer){
@@ -184,6 +187,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 timerRunning=false;
                 musicService.play();
+                LinearLayout pl=((LinearLayout)findViewById(R.id.playing_now_frag));
+                pl.setVisibility(View.VISIBLE);
             }
         });
     }

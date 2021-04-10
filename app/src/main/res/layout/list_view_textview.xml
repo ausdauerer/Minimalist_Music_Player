@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="Hello World"
-    android:textSize="20dip"
+    android:textSize="18dip"
     android:padding="15dip"
     android:textStyle="bold"
     android:layout_margin="5dp"
