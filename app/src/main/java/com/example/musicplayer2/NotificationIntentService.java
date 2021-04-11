@@ -48,6 +48,9 @@ public class NotificationIntentService extends IntentService {
                     @Override
                     public void run() {
                         Toast.makeText(getBaseContext(), "You clicked the Next Button", Toast.LENGTH_LONG).show();
+                        Intent broadcastIntent = new Intent();
+                        broadcastIntent.setAction("NEXT_BUTTON_CLICKED");
+                        getApplicationContext().sendBroadcast(broadcastIntent);
                     }
                 });
                 break;

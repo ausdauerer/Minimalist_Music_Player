@@ -3,10 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
+    android:layout_height="250dp"
+    android:padding="10dp"
     android:orientation="horizontal"
     android:weightSum="10"
-    android:background="@color/black">
+    android:background="#343638">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -18,21 +19,54 @@
         android:id="@+id/not_songTitle"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="6"
+        android:layout_weight="5"
         android:textColor="@color/white"
         android:text="Hello World"
         android:gravity="left|center_vertical"
-        android:paddingLeft="20dp"
-        android:textSize="20dp"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:textColor="@color/white"
-        android:text="This is my world"
-        android:gravity="left|center_vertical"
-        android:paddingLeft="20dp"
-        android:textSize="13dp"/>
+        android:paddingLeft="5dp"
+        android:textSize="20dp"
+        android:scrollHorizontally="true"/>
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:id="@+id/progress"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:max="100"
+            android:progress="0"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:weightSum="10"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/not_cur_pos"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:textColor="@color/white"
+                android:gravity="left|center_vertical"
+                android:text="00:00"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4" />
+            <TextView
+                android:id="@+id/not_dur_pos"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:textColor="@color/white"
+                android:gravity="right|center_vertical"
+                android:text="00:00"/>
+
+        </LinearLayout>
     </LinearLayout>
     <LinearLayout
         android:layout_width="0dp"
@@ -41,7 +75,8 @@
         android:weightSum="9"
         android:orientation="horizontal"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp">
+        android:paddingRight="10dp"
+        android:padding="10dp">
 
         <ImageView
             android:id="@+id/not_button_prev"
@@ -49,14 +84,16 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="3"
-            android:backgroundTint="#343638"/>
+            android:backgroundTint="#343638"
+            android:layout_gravity="center"/>
         <ImageView
             android:id="@+id/not_button_play"
             android:src="@android:drawable/ic_media_play"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="3"
-            android:backgroundTint="#343638"/>
+            android:backgroundTint="#343638"
+            android:gravity="center"/>
         <ImageView
             android:id="@+id/not_button_next"
             android:src="@android:drawable/ic_media_next"

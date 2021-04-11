@@ -14,11 +14,14 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
@@ -30,7 +33,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class PlayMusicService extends Service {
-
+    Handler handler=new Handler();
     MediaPlayer mediaPlayer;
     ArrayList<Integer> songs=new ArrayList<Integer>();
     int currentSongPosition=0;
@@ -45,13 +48,20 @@ public class PlayMusicService extends Service {
             return PlayMusicService.this;
         }
     }
-
+    String timeduration;
+    IntentFilter intentFilter;
+    Runnable runnableCode;
+    boolean progressTimerRunning=false;
+    NotificationCompat.Builder builder;
+    NotificationManager notificationManager;
     @Override
     public void onCreate(){
         super.onCreate();
         notificationLayoutExpanded=new RemoteViews(getPackageName(), R.layout.notification_small);
         mediaPlayer=new MediaPlayer();
         initialiseMusicPLayer();
+        intentFilter = new IntentFilter();
+        intentFilter.addAction("NEXT_BUTTON_CLICKED");
     }
     public void initialiseMusicPLayer(){
         //mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
@@ -64,10 +74,10 @@ public class PlayMusicService extends Service {
                 Intent localIntent = new Intent("CUSTOM_ACTION");
                 //Duration
                 int duration=getMusicDuration();
-                String timeduration = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(duration), TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
+                timeduration = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(duration), TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
                 Log.d("dbg",timeduration);
                 //Song Name
-                if(songTitle.indexOf('.')>20)
+                if(songTitle.indexOf('.')>13)
                     songTitle=songTitle.substring(0,19)+"...";
                 else
                     songTitle=songTitle.substring(0,songTitle.indexOf('.'));
@@ -75,11 +85,31 @@ public class PlayMusicService extends Service {
                 localIntent.putExtra("songDuration",timeduration);
                 localBroadcastManager.sendBroadcast(localIntent);
                 Log.d("dbg","Successfully started playing music after onPrepared"+songTitle);
+                if(songTitle.indexOf('.')>14)
+                    songTitle=songTitle.substring(0,14);
                 notificationLayoutExpanded.setTextViewText(R.id.not_songTitle,songTitle);
-                IntentFilter filter = new IntentFilter();
-                filter.addAction("CUSTOM_ACTION");
+                notificationLayoutExpanded.setTextViewText(R.id.not_dur_pos,timeduration);
+                //notificationLayoutExpanded.setTextViewText(R.id.songDuration,"Playing for "+timeduration+" minutes");
+                setnotification();
+                if(progressTimerRunning==false){
+                    handler.postDelayed(runnableCode ,1000);
+                    progressTimerRunning=true;
+                }
             }
         });
+        runnableCode = new Runnable() {
+            @Override
+            public void run() {
+                int completion=(getMusicCurrentPosition()*100)/getMusicDuration();
+                Log.d("dbg",String.valueOf(completion)+"handler running");
+                notificationLayoutExpanded.setProgressBar(R.id.progress,100,completion,false);
+                int duration=getMusicCurrentPosition();
+                timeduration = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(duration), TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
+                notificationLayoutExpanded.setTextViewText(R.id.not_cur_pos,timeduration);
+                notificationManager.notify(0, builder.build());
+                handler.postDelayed(this, 1000);
+            }
+        };
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPLayer) {
@@ -115,6 +145,7 @@ public class PlayMusicService extends Service {
     }
     @Override
     public int onStartCommand(Intent intent,int flags,int startId){
+        registerReceiver(intentReceiver, intentFilter);
         return super.onStartCommand(intent,flags,startId);
     }
 
@@ -129,7 +160,8 @@ public class PlayMusicService extends Service {
         }catch(Exception e){e.printStackTrace();}
         mediaPlayer.prepareAsync();
         Log.d("dbg","Now started playing");
-        setnotification();
+        //int duration=getMusicDuration();
+        //timeduration = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(duration), TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
     }
     public void setSong(int index){
         currentSongPosition=index;
@@ -207,14 +239,24 @@ public class PlayMusicService extends Service {
         notificationLayoutExpanded.setOnClickPendingIntent(R.id.not_button_play, PendingIntent.getService(this, 123, play_pause, PendingIntent.FLAG_UPDATE_CURRENT));
         notificationLayoutExpanded.setOnClickPendingIntent(R.id.not_button_prev, PendingIntent.getService(this, 124, previousIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         notificationLayoutExpanded.setOnClickPendingIntent(R.id.not_button_next, PendingIntent.getService(this, 125, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT));
-        NotificationCompat.Builder builder =new NotificationCompat.Builder(this)
+        builder =new NotificationCompat.Builder(this)
                 .setSmallIcon(android.R.drawable.ic_btn_speak_now)
                 .setContentTitle("Title")
                 .setContentText("text")
                 .setAutoCancel(true)
                 .setContentIntent(PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),0))
                 .setCustomBigContentView(notificationLayoutExpanded);
-        NotificationManager notificationManager = (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager = (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(0, builder.build());
+    }
+    private BroadcastReceiver intentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("dbg","----.-.-.-.-.-.-.-.-.-.-");
+            playNext();
+        }
+    };
+    public void onDestroy(){
+        handler.removeCallbacks(runnableCode);
     }
 }
