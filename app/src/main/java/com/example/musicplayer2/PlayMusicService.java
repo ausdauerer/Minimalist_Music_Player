@@ -240,7 +240,7 @@ public class PlayMusicService extends Service {
         notificationLayoutExpanded.setOnClickPendingIntent(R.id.not_button_prev, PendingIntent.getService(this, 124, previousIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         notificationLayoutExpanded.setOnClickPendingIntent(R.id.not_button_next, PendingIntent.getService(this, 125, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         builder =new NotificationCompat.Builder(this)
-                .setSmallIcon(android.R.drawable.ic_btn_speak_now)
+                .setSmallIcon(R.drawable.music)
                 .setContentTitle("Title")
                 .setContentText("text")
                 .setAutoCancel(true)

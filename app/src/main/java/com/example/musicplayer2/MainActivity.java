@@ -61,7 +61,8 @@ public class MainActivity extends AppCompatActivity {
             isBoundMusicService=true;
         }
         @Override
-        public void onServiceDisconnected(ComponentName name){ musicService=null; isBoundMusicService=false;}
+        public void onServiceDisconnected(ComponentName name){ musicService=null;
+             isBoundMusicService=false;}
     };
     @Override
     public void onCreate(Bundle savedInstanceState){
